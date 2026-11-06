@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard-Z | Multi-Layered Phishing Intelligence</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfeff',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            900: '#164e63',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glow {
+            box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.25);
+        }
+        .gauge-meter {
+            transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Background decoration -->
+    <div class="fixed inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.15),rgba(255,255,255,0))] pointer-events-none"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between pb-8 border-b border-slate-800 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="h-11 w-11 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-400 flex items-center justify-center font-black text-xl text-black shadow-lg shadow-cyan-500/20">
+                    Z
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl font-extrabold tracking-tight text-white">PhishGuard-Z</h1>
+                        <span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">Live Engine</span>
+                    </div>
+                    <p class="text-sm text-slate-400">Zero-Day Phishing Detection • Character Transformer + Multi-Layered Infrastructure RDAP</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-400 bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>PhishNet Transformer: <span class="text-emerald-400 font-semibold">Active</span></span>
+            </div>
+        </header>
+
+        <!-- Search / Input Section -->
+        <section class="mt-8">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 glow backdrop-blur-sm">
+                <label for="url-input" class="block text-sm font-semibold text-slate-300 mb-2">Enter Target URL to Inspect</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="url-input" 
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent font-mono text-sm transition"
+                            placeholder="https://example.com/login?token=abc" 
+                            value="https://canva.link/f1xhZ6gZ6a47kkw" />
+                    </div>
+                    <button id="scan-btn" onclick="startScan()" 
+                        class="px-7 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-bold text-slate-950 rounded-xl transition shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2">
+                        <span id="btn-text">Analyze URL</span>
+                        <svg id="btn-spinner" class="hidden animate-spin h-5 w-5 text-slate-950" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                    <span class="text-slate-500 font-medium">Quick Test:</span>
+                    <button onclick="setAndScan('https://canva.link/f1xhZ6gZ6a47kkw')" class="px-2.5 py-1 bg-slate-800/70 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">Canva Shortlink (Reputable)</button>
+                    <button onclick="setAndScan('http://paypal-security-update.xyz/verify?token=123')" class="px-2.5 py-1 bg-red-950/40 hover:bg-red-950/70 text-red-300 rounded-lg border border-red-900/60 transition">PayPal Spoof (.xyz Phish)</button>
+                    <button onclick="setAndScan('https://google.com')" class="px-2.5 py-1 bg-slate-800/70 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-700/60 transition">Google (Benchmark)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Container -->
+        <main id="results-area" class="mt-8 space-y-6">
+
+            <!-- Top Row: Risk Meter & Summary Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Gauge & Verdict Card -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div id="verdict-badge" class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        Low Risk
+                    </div>
+                    
+                    <!-- SVG Gauge Meter -->
+                    <div class="relative w-48 h-36 flex items-center justify-center">
+                        <svg class="w-48 h-36 transform -rotate-180" viewBox="0 0 100 60">
+                            <!-- Background Arc -->
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#1e293b" stroke-width="10" stroke-linecap="round" />
+                            <!-- Active Value Arc -->
+                            <path id="gauge-arc" class="gauge-meter" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="10" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-end pb-2">
+                            <span id="composite-percent" class="text-4xl font-black tracking-tight text-white">0%</span>
+                            <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Risk Score</span>
+                        </div>
+                    </div>
+
+                    <h2 class="text-lg font-bold text-slate-200 mt-2">PhishGuard-Z Verdict</h2>
+                    <p id="verdict-desc" class="text-xs text-slate-400 mt-1 max-w-xs">Analysis completed across character sequence and domain registration.</p>
+                </div>
+
+                <!-- AI Transformer vs Infrastructure Breakdown Card -->
+                <div class="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                                <span class="h-2.5 w-2.5 rounded-full bg-cyan-400"></span>
+                                Multi-Layered Intelligence Breakdown
+                            </h3>
+                            <span class="text-xs text-slate-500 font-mono">Character + Network Layer</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+                                <div class="text-xs text-slate-400 font-medium">Raw AI Transformer (PhishNet)</div>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <span id="raw-model-prob" class="text-2xl font-bold font-mono text-cyan-400">0%</span>
+                                    <span class="text-xs text-slate-500">Lexical score</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                                    Evaluates raw character sequence, n-grams, and URL patterns.
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+                                <div class="text-xs text-slate-400 font-medium">Domain Age & Registration</div>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <span id="infra-age-summary" class="text-2xl font-bold font-mono text-emerald-400">-</span>
+                                </div>
+                                <div id="infra-registrar-summary" class="text-[11px] text-slate-400 mt-2 truncate">
+                                    Registrar: -
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adjustments list -->
+                        <div class="mt-4 bg-slate-950/40 p-3.5 rounded-xl border border-slate-800/60">
+                            <div class="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                                Composite Adjustments Applied:
+                            </div>
+                            <ul id="adjustments-list" class="space-y-1 text-xs text-slate-400 font-mono">
+                                <li class="text-slate-500 italic">None</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Grid (6 Categories) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- 1. URL Structure & Depth -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-blue-500/10 text-blue-400">📏</span>
+                        1. URL Length & Path Depth
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Total URL Length:</span>
+                            <span id="f-url-length" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Host Length:</span>
+                            <span id="f-host-length" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Path Depth (segments):</span>
+                            <span id="f-path-depth" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Query Parameters:</span>
+                            <span id="f-query-params" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">IP Used as Host:</span>
+                            <span id="f-is-ip-host" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Shannon Entropy & Randomness -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-purple-500/10 text-purple-400">🎲</span>
+                        2. Entropy & Randomness
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">URL Shannon Entropy:</span>
+                            <span id="f-url-entropy" class="font-mono font-bold text-slate-200">0.000</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Host Entropy:</span>
+                            <span id="f-host-entropy" class="font-mono font-bold text-slate-200">0.000</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Path Entropy:</span>
+                            <span id="f-path-entropy" class="font-mono font-bold text-slate-200">0.000</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Randomness Score:</span>
+                            <span id="f-randomness-score" class="font-mono font-bold text-slate-200">0.000</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">Longest Consonant Run:</span>
+                            <span id="f-consonant-run" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Suspicious Tokens & Brand Target -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-amber-500/10 text-amber-400">🎯</span>
+                        3. Tokens & Brand Matching
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Suspicious Tokens Found:</span>
+                            <span id="f-token-count" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block mb-1.5">Detected Tokens:</span>
+                            <div id="f-tokens-tags" class="flex flex-wrap gap-1 min-h-[24px]">
+                                <span class="text-slate-500 italic">None</span>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-800/60 pt-2">
+                            <span class="text-slate-400 block mb-1.5">Brand Keywords:</span>
+                            <div id="f-brands-tags" class="flex flex-wrap gap-1 min-h-[24px]">
+                                <span class="text-slate-500 italic">None</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-slate-400">Brand Impersonation:</span>
+                            <span id="f-brand-impersonate" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. TLD Characteristics -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-teal-500/10 text-teal-400">🌐</span>
+                        4. TLD Diagnostics
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Top-Level Domain:</span>
+                            <span id="f-tld" class="font-mono font-bold text-slate-200">.com</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">TLD Character Length:</span>
+                            <span id="f-tld-length" class="font-mono font-bold text-slate-200">3</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Country Code TLD:</span>
+                            <span id="f-tld-country" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">Flagged Risky TLD:</span>
+                            <span id="f-tld-risky" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. DNS & Network Records -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-indigo-500/10 text-indigo-400">⚡</span>
+                        5. DNS & Network Records
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">DNS Resolution:</span>
+                            <span id="f-dns-resolves" class="font-mono font-bold text-emerald-400">Resolves</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">A Records (IPv4):</span>
+                            <span id="f-a-records" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">AAAA Records (IPv6):</span>
+                            <span id="f-aaaa-records" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Name Servers (NS):</span>
+                            <span id="f-ns-records" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">SPF Mail Record Configured:</span>
+                            <span id="f-spf" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">Origin ASN / Country:</span>
+                            <span id="f-asn" class="font-mono font-bold text-slate-200">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Domain Age, RDAP & Redirects -->
+                <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <span class="p-1 rounded bg-emerald-500/10 text-emerald-400">🛡️</span>
+                        6. RDAP Registration & Hops
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Domain Age:</span>
+                            <span id="f-domain-age" class="font-mono font-bold text-emerald-400">-</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">Domain Registrar:</span>
+                            <span id="f-registrar" class="font-mono font-bold text-slate-200 truncate max-w-[150px]">-</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800/60">
+                            <span class="text-slate-400">HTTP Redirect Hops:</span>
+                            <span id="f-redirect-count" class="font-mono font-bold text-slate-200">0</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">Final Domain Altered:</span>
+                            <span id="f-redirect-changed" class="font-mono font-bold text-slate-200">NO</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-xs text-slate-600 border-t border-slate-900 pt-6 font-mono">
+            PhishGuard-Z • Hackathon Research Engine • Real-time Threat Intelligence
+        </footer>
+    </div>
+
+    <!-- Client-Side Scan Script -->
+    <script>
+        function setAndScan(url) {
+            document.getElementById('url-input').value = url;
+            startScan();
+        }
+
+        async function startScan() {
+            const urlInput = document.getElementById('url-input').value.trim();
+            if (!urlInput) return;
+
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const scanBtn = document.getElementById('scan-btn');
+
+            btnText.textContent = "Analyzing...";
+            btnSpinner.classList.remove('hidden');
+            scanBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                renderResults(data);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to analyze URL: " + err);
+            } finally {
+                btnText.textContent = "Analyze URL";
+                btnSpinner.classList.add('hidden');
+                scanBtn.disabled = false;
+            }
+        }
+
+        function renderResults(data) {
+            const prob = data.composite_prob;
+            const risk = data.composite_risk;
+
+            // Gauge calculations
+            // Full arc length for r=40 is ~126
+            const arc = document.getElementById('gauge-arc');
+            const offset = 126 - (126 * (prob / 100));
+            arc.style.strokeDashoffset = offset;
+
+            // Gauge Color & Badge
+            const badge = document.getElementById('verdict-badge');
+            const desc = document.getElementById('verdict-desc');
+            document.getElementById('composite-percent').textContent = prob + '%';
+
+            if (prob >= 80) {
+                arc.setAttribute('stroke', '#ef4444');
+                badge.className = "px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-red-500/10 text-red-400 border border-red-500/30";
+                badge.textContent = "CRITICAL RISK (PHISHING)";
+                desc.textContent = "High probability of malicious intent. Suspicious indicators strongly outweigh trust signals.";
+            } else if (prob >= 50) {
+                arc.setAttribute('stroke', '#f97316');
+                badge.className = "px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-orange-500/10 text-orange-400 border border-orange-500/30";
+                badge.textContent = "HIGH RISK (SUSPICIOUS)";
+                desc.textContent = "Elevated risk detected. Domain or URL patterns resemble credential harvesting lures.";
+            } else if (prob >= 25) {
+                arc.setAttribute('stroke', '#eab308');
+                badge.className = "px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+                badge.textContent = "MEDIUM RISK";
+                desc.textContent = "Moderate anomalies detected. Proceed with caution and verify destination.";
+            } else {
+                arc.setAttribute('stroke', '#10b981');
+                badge.className = "px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                badge.textContent = "LOW RISK (LEGITIMATE)";
+                desc.textContent = "Legitimate infrastructure verified. Strong domain trust and standard network signals.";
+            }
+
+            // Top Summary Cards
+            document.getElementById('raw-model-prob').textContent = data.raw_transformer_prob + '%';
+            document.getElementById('infra-age-summary').textContent = data.infra.domain_age;
+            document.getElementById('infra-registrar-summary').textContent = "Registrar: " + data.infra.registrar;
+
+            // Adjustments
+            const adjList = document.getElementById('adjustments-list');
+            adjList.innerHTML = '';
+            if (data.adjustments && data.adjustments.length > 0) {
+                data.adjustments.forEach(adj => {
+                    const li = document.createElement('li');
+                    li.className = "text-cyan-300";
+                    li.textContent = "• " + adj;
+                    adjList.appendChild(li);
+                });
+            } else {
+                adjList.innerHTML = '<li class="text-slate-500 italic">No adjustments applied.</li>';
+            }
+
+            // Grid items
+            const lex = data.lexical;
+            const inf = data.infra;
+
+            document.getElementById('f-url-length').textContent = lex.url_length;
+            document.getElementById('f-host-length').textContent = lex.host_length;
+            document.getElementById('f-path-depth').textContent = lex.path_depth;
+            document.getElementById('f-query-params').textContent = lex.num_params || 0;
+            document.getElementById('f-is-ip-host').textContent = lex.is_ip_host ? "YES (Alert)" : "NO";
+            document.getElementById('f-is-ip-host').className = lex.is_ip_host ? "font-mono font-bold text-red-400" : "font-mono font-bold text-slate-200";
+
+            document.getElementById('f-url-entropy').textContent = lex.url_entropy;
+            document.getElementById('f-host-entropy').textContent = lex.host_entropy || lex.url_entropy;
+            document.getElementById('f-path-entropy').textContent = lex.path_entropy || '0.000';
+            document.getElementById('f-randomness-score').textContent = lex.randomness_score;
+            document.getElementById('f-consonant-run').textContent = lex.longest_consonant_run || 0;
+
+            document.getElementById('f-token-count').textContent = lex.suspicious_tokens.length;
+            const tokenBox = document.getElementById('f-tokens-tags');
+            tokenBox.innerHTML = '';
+            if (lex.suspicious_tokens.length > 0) {
+                lex.suspicious_tokens.forEach(t => {
+                    const sp = document.createElement('span');
+                    sp.className = "px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]";
+                    sp.textContent = t;
+                    tokenBox.appendChild(sp);
+                });
+            } else {
+                tokenBox.innerHTML = '<span class="text-slate-500 italic">None</span>';
+            }
+
+            const brandBox = document.getElementById('f-brands-tags');
+            brandBox.innerHTML = '';
+            if (lex.matched_brands.length > 0) {
+                lex.matched_brands.forEach(b => {
+                    const sp = document.createElement('span');
+                    sp.className = "px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono text-[10px]";
+                    sp.textContent = b;
+                    brandBox.appendChild(sp);
+                });
+            } else {
+                brandBox.innerHTML = '<span class="text-slate-500 italic">None</span>';
+            }
+
+            document.getElementById('f-brand-impersonate').textContent = lex.brand_impersonation ? "YES (Warning)" : "NO";
+            document.getElementById('f-brand-impersonate').className = lex.brand_impersonation ? "font-mono font-bold text-red-400" : "font-mono font-bold text-slate-200";
+
+            document.getElementById('f-tld').textContent = lex.tld;
+            document.getElementById('f-tld-length').textContent = lex.tld.replace('.', '').length;
+            document.getElementById('f-tld-country').textContent = lex.is_country_tld ? "YES" : "NO";
+            document.getElementById('f-tld-risky').textContent = lex.is_risky_tld ? "YES (Flagged)" : "NO";
+            document.getElementById('f-tld-risky').className = lex.is_risky_tld ? "font-mono font-bold text-amber-400" : "font-mono font-bold text-slate-200";
+
+            document.getElementById('f-dns-resolves').textContent = inf.dns_resolves ? "Resolves" : "Failed / Offline";
+            document.getElementById('f-dns-resolves').className = inf.dns_resolves ? "font-mono font-bold text-emerald-400" : "font-mono font-bold text-red-400";
+            document.getElementById('f-a-records').textContent = inf.a_records;
+            document.getElementById('f-aaaa-records').textContent = inf.aaaa_records;
+            document.getElementById('f-ns-records').textContent = inf.ns_records;
+            document.getElementById('f-spf').textContent = inf.has_spf ? "YES" : "NO";
+            document.getElementById('f-asn').textContent = `${inf.asn} (${inf.asn_country})`;
+
+            document.getElementById('f-domain-age').textContent = inf.domain_age;
+            document.getElementById('f-registrar').textContent = inf.registrar;
+            document.getElementById('f-redirect-count').textContent = inf.redirect_count;
+            document.getElementById('f-redirect-changed').textContent = inf.redirect_domain_changed ? "YES (Hop Alert)" : "NO";
+        }
+
+        // Run initial scan on load
+        window.addEventListener('DOMContentLoaded', () => {
+            startScan();
+        });
+    </script>
+</body>
+</html>
+

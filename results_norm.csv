@@ -1,3 +1,4 @@
 mode,phiusiil_F1,phiusiil_ROC_AUC,phiusiil_FPR,phiusiil_FNR,legitphish_F1,legitphish_ROC_AUC,legitphish_FPR,legitphish_FNR,rule_F1_phiusiil,rule_F1_legitphish
 raw,0.9973,0.9986,0.0003,0.0051,0.9966,0.9985,0.0366,0.0001,0.9866,0.9968
 nowww,0.8711,0.9294,0.0137,0.2154,0.9954,0.9849,0.0507,0.0001,0.9866,0.9968
+host,0.8091,0.8985,0.0376,0.2890,0.9650,0.9675,0.0471,0.0596,0.9866,0.9968
